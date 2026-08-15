@@ -607,6 +607,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"husky@npm:^9.1.7":
+  version: 9.1.7
+  resolution: "husky@npm:9.1.7"
+  bin:
+    husky: bin.js
+  checksum: 10c0/35bb110a71086c48906aa7cd3ed4913fb913823715359d65e32e0b964cb1e255593b0ae8014a5005c66a68e6fa66c38dcfa8056dbbdfb8b0187c0ffe7ee3a58f
+  languageName: node
+  linkType: hard
+
 "isexe@npm:^4.0.0":
   version: 4.0.0
   resolution: "isexe@npm:4.0.0"
@@ -692,6 +701,7 @@ __metadata:
     "@hono/node-server": "npm:^2.1.1"
     "@types/node": "npm:^26.1.1"
     hono: "npm:^4.13.2"
+    husky: "npm:^9.1.7"
     tsx: "npm:^4.23.0"
     typescript: "npm:^7.0.2"
   languageName: unknown
