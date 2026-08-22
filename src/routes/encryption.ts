@@ -7,10 +7,10 @@ const EncryptedPayloadSchema = z
 	.record(z.string(), z.string())
 	.openapi("EncryptedPayload", {
 		example: {
-			name: "IkpvaG4gRG9lIg==",
-			age: "MzA=",
+			name: "some_encrypted_value==",
+			age: "some_encrypted_value=",
 			contact:
-				"eyJlbWFpbCI6ImpvaG5AZXhhbXBsZS5jb20iLCJwaG9uZSI6IjEyMy00NTYtNzg5MCJ9",
+				"some_encrypted_value",
 		},
 	});
 
@@ -56,7 +56,7 @@ const decryptRoute = createRoute({
 		body: {
 			required: true,
 			content: {
-				"application/json": { schema: JsonObjectSchema },
+				"application/json": { schema: EncryptedPayloadSchema },
 			},
 		},
 	},
