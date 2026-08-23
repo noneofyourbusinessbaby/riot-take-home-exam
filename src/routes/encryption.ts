@@ -9,8 +9,7 @@ const EncryptedPayloadSchema = z
 		example: {
 			name: "some_encrypted_value==",
 			age: "some_encrypted_value=",
-			contact:
-				"some_encrypted_value",
+			contact: "some_encrypted_value",
 		},
 	});
 
