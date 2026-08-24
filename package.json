@@ -2,6 +2,7 @@
 	"name": "take-home-exercise-riot",
 	"type": "module",
 	"scripts": {
+		"postinstall": "husky",
 		"dev": "tsx watch --env-file=.env src/index.ts",
 		"build": "tsc -p tsconfig.build.json",
 		"start": "node --env-file=.env dist/index.js",
