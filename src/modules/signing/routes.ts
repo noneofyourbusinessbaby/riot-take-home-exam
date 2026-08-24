@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { HTTPException } from "hono/http-exception";
-import { ErrorSchema, JsonObjectSchema } from "../schemas/common.js";
+import { defaultHook } from "../../errors.js";
+import { ErrorSchema, JsonObjectSchema } from "../../schemas.js";
+import type { SigningService } from "./service.js";
 
 const SignatureSchema = z.string().openapi({
 	example: "a1b2c3d4e5f6g7h8i9j0",
@@ -78,10 +79,17 @@ const verifyRoute = createRoute({
 	},
 });
 
-export const signingRoutes = new OpenAPIHono()
-	.openapi(signRoute, () => {
-		throw new HTTPException(501, { message: "Not implemented" });
-	})
-	.openapi(verifyRoute, () => {
-		throw new HTTPException(501, { message: "Not implemented" });
-	});
+export const signingRoutes = (service: SigningService) =>
+	new OpenAPIHono({ defaultHook })
+		.openapi(signRoute, (c) =>
+			c.json({ signature: service.signPayload(c.req.valid("json")) }, 200),
+		)
+		.openapi(verifyRoute, (c) => {
+			const { signature, data } = c.req.valid("json");
+
+			if (!service.verifyPayload(data, signature)) {
+				return c.json({ error: "The signature does not match the data" }, 400);
+			}
+
+			return c.body(null, 204);
+		});
