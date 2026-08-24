@@ -1,21 +1,18 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { HTTPException } from "hono/http-exception";
-import { ErrorSchema, JsonObjectSchema } from "../schemas/common.js";
+import { defaultHook } from "../../errors.js";
+import { ErrorSchema, JsonObjectSchema } from "../../schemas.js";
+import type { EncryptionService } from "./service.js";
 
-/**
- * Every depth-1 property is replaced by its encrypted string representation.
- * Unknown rather than string: a payload sent to /decrypt can be partially
- * encrypted, and a property that never went through /encrypt keeps its own JSON
- * type.
- */
+// Unknown rather than string: a payload sent to /decrypt can be partially
+// encrypted, and a property that never went through /encrypt keeps its own JSON
+// type.
 const EncryptedPayloadSchema = z
 	.record(z.string(), z.unknown())
 	.openapi("EncryptedPayload", {
 		example: {
 			name: "some_encrypted_value==",
 			age: "some_encrypted_value=",
-			contact:
-				"some_encrypted_value",
+			contact: "some_encrypted_value",
 		},
 	});
 
@@ -56,7 +53,7 @@ const decryptRoute = createRoute({
 	tags: ["Encryption"],
 	summary: "Decrypt the encrypted depth-1 properties of a JSON payload",
 	description:
-		"Detects which depth-1 properties hold an encrypted value and decrypts them, restoring their original JSON type. Properties that were never encrypted are returned unchanged.",
+		"Detects which depth-1 properties hold an encrypted value and decrypts them, restoring their original JSON type. A payload may be partially encrypted: properties that were never encrypted are returned unchanged, whatever their JSON type.",
 	request: {
 		body: {
 			required: true,
@@ -81,10 +78,11 @@ const decryptRoute = createRoute({
 	},
 });
 
-export const encryptionRoutes = new OpenAPIHono()
-	.openapi(encryptRoute, () => {
-		throw new HTTPException(501, { message: "Not implemented" });
-	})
-	.openapi(decryptRoute, () => {
-		throw new HTTPException(501, { message: "Not implemented" });
-	});
+export const encryptionRoutes = (service: EncryptionService) =>
+	new OpenAPIHono({ defaultHook })
+		.openapi(encryptRoute, (c) =>
+			c.json(service.encryptPayload(c.req.valid("json")), 200),
+		)
+		.openapi(decryptRoute, (c) =>
+			c.json(service.decryptPayload(c.req.valid("json")), 200),
+		);
