@@ -13,6 +13,16 @@ const ConfigSchema = z.object({
 	// because a variable left empty in a `.env` file (`SIGNING_SECRET=`) arrives as
 	// the empty string rather than as undefined, and an empty key is no key.
 	SIGNING_SECRET: z.string().min(1),
+
+	// The port the server listens on. It carries a default where the secret
+	// deliberately carries none: it is not confidential, so a value in the
+	// repository gives nothing away, and every environment that has an opinion —
+	// a container published on another port, a platform injecting `PORT` — states
+	// it. Coerced because the environment only ever hands over strings, and bounded
+	// because `PORT=0` asks the kernel for a random port and `PORT=99999` is not a
+	// port at all; both are worth failing at boot rather than at the first request
+	// nobody could address.
+	PORT: z.coerce.number().int().min(1).max(65535).default(3000),
 });
 
 const parsed = ConfigSchema.safeParse(process.env);
