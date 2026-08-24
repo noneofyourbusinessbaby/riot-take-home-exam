@@ -1,0 +1,25 @@
+# The build context carries the sources and the manifests, nothing else: the
+# image installs its own dependencies and compiles `dist` itself, and `.env` must
+# never reach a layer, since a secret baked into an image is a secret published
+# with it.
+.env
+.env.*
+
+node_modules
+dist
+.yarn
+.git
+.github
+.husky
+.claude
+.vscode
+.idea
+
+*.log
+.DS_Store
+
+CLAUDE.md
+INSTRUCTIONS.md
+README.md
+tests
+vitest.config.ts
