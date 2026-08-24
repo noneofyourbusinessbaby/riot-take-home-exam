@@ -2,15 +2,20 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { HTTPException } from "hono/http-exception";
 import { ErrorSchema, JsonObjectSchema } from "../schemas/common.js";
 
-/** Every depth-1 property is replaced by its encrypted string representation. */
+/**
+ * Every depth-1 property is replaced by its encrypted string representation.
+ * Unknown rather than string: a payload sent to /decrypt can be partially
+ * encrypted, and a property that never went through /encrypt keeps its own JSON
+ * type.
+ */
 const EncryptedPayloadSchema = z
-	.record(z.string(), z.string())
+	.record(z.string(), z.unknown())
 	.openapi("EncryptedPayload", {
 		example: {
-			name: "IkpvaG4gRG9lIg==",
-			age: "MzA=",
+			name: "some_encrypted_value==",
+			age: "some_encrypted_value=",
 			contact:
-				"eyJlbWFpbCI6ImpvaG5AZXhhbXBsZS5jb20iLCJwaG9uZSI6IjEyMy00NTYtNzg5MCJ9",
+				"some_encrypted_value",
 		},
 	});
 
@@ -56,7 +61,7 @@ const decryptRoute = createRoute({
 		body: {
 			required: true,
 			content: {
-				"application/json": { schema: JsonObjectSchema },
+				"application/json": { schema: EncryptedPayloadSchema },
 			},
 		},
 	},
