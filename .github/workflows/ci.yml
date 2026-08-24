@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  # Every branch gets its checks from the first commit pushed, before a pull
+  # request exists to ask for them. The default branch is excluded because CD
+  # already calls this workflow for it; without that exclusion every merge would
+  # run the same jobs twice.
+  push:
+    branches-ignore: [main, master]
+  # Not redundant with the trigger above, and deliberately not narrowed to avoid
+  # the overlap: the two events check different commits. A push checks what was
+  # written, a pull request checks the merge of it into the base — which is the
+  # commit that ends up on the branch, and the only one a fork's contribution ever
+  # produces here.
+  pull_request:
+  # Called by the CD workflow, which runs these checks before publishing anything.
+  # @see https://docs.github.com/actions/sharing-automations/reusing-workflows
+  workflow_call:
+
+# The workflow only reads the repository; nothing it runs needs a write token.
+permissions:
+  contents: read
+
+# Every action below is pinned to the commit its version tag pointed at, since a
+# tag is mutable and a compromised one runs with this workflow's token — the
+# hazard GitHub's hardening guide names first. Dependabot moves the digests and
+# rewrites the trailing comment, so the pinning is maintained rather than frozen.
+# @see https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+
+# A new push to the same branch makes the run in progress obsolete.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: check, typecheck, test, build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      # Yarn 4 is not vendored in the repository, so Corepack fetches the version
+      # pinned by the `packageManager` field of package.json. It runs before
+      # setup-node on purpose: setup-node resolves the Yarn cache folder by
+      # calling Yarn itself, which has to exist by then.
+      # @see https://github.com/actions/setup-node#caching-global-packages-data
+      - name: Enable Corepack
+        run: |
+          npm install --global corepack@latest
+          corepack enable
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      # `--immutable` fails the run if the lockfile would have to change, so a
+      # dependency added without committing yarn.lock is caught here.
+      - name: Install dependencies
+        run: yarn install --immutable
+        # Husky installs git hooks from the `postinstall` script; a CI checkout
+        # has no use for them.
+        # @see https://typicode.github.io/husky/how-to.html#ci-server-and-docker
+        env:
+          HUSKY: "0"
+
+      # Biome in its CI mode: it reports the same problems as `yarn check` but
+      # writes nothing, so a run fails on unformatted code instead of quietly
+      # fixing it.
+      # @see https://biomejs.dev/reference/cli/#biome-ci
+      - name: Check formatting and lint
+        run: yarn check:ci
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      # No step prepares an environment for this one: the suite carries its own,
+      # `.env.test`, which is committed and loaded by `vitest.config.ts`. CI
+      # therefore runs the tests against exactly what a developer runs them
+      # against.
+      - name: Test
+        run: yarn test
+
+      - name: Build
+        run: yarn build
