@@ -2,6 +2,7 @@
 	"name": "take-home-exercise-riot",
 	"type": "module",
 	"scripts": {
+		"postinstall": "husky || true",
 		"dev": "tsx watch src/index.ts",
 		"build": "tsc",
 		"start": "node dist/index.js",
