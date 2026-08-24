@@ -735,6 +735,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"canonicalize@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "canonicalize@npm:4.0.0"
+  bin:
+    canonicalize: bin/canonicalize.js
+  checksum: 10c0/8d0bc5da33b53aab574ee0973f3964e25c4003b880d0d70f7bb05f906c94f1906f9002886ed087c4eb8911ccfa7b1c7af590c6ce8444c4538cbc3e3cdb18ea9c
+  languageName: node
+  linkType: hard
+
 "chai@npm:^6.2.2":
   version: 6.2.2
   resolution: "chai@npm:6.2.2"
@@ -1291,6 +1300,7 @@ __metadata:
     "@hono/swagger-ui": "npm:^0.6.1"
     "@hono/zod-openapi": "npm:^1.6.0"
     "@types/node": "npm:^26.1.1"
+    canonicalize: "npm:^4.0.0"
     hono: "npm:^4.13.2"
     husky: "npm:^9.1.7"
     tsx: "npm:^4.23.0"

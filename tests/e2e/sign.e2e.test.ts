@@ -65,6 +65,18 @@ describe("POST /sign", () => {
 		expect(await stringified.json()).not.toEqual(await signed.json());
 	});
 
+	// A non-ASCII character has to reach the HMAC as its UTF-8 bytes rather than
+	// be dropped or folded into an ASCII one, which shows in the signature
+	// differing from the one of the same name written without it.
+	it("signs a non-ASCII character as part of the value", async () => {
+		const [signed, ascii] = await Promise.all([
+			client.sign.$post({ json: { name: "John Do☹e" } }),
+			client.sign.$post({ json: { name: "John Doe" } }),
+		]);
+
+		expect(await signed.json()).not.toEqual(await ascii.json());
+	});
+
 	// The typed client only accepts JSON objects, so the bodies the API has to
 	// reject are sent with app.request. @see https://hono.dev/docs/guides/testing
 	it("rejects a body that is not a JSON object", async () => {

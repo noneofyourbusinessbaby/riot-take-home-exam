@@ -2,9 +2,9 @@
 	"name": "take-home-exercise-riot",
 	"type": "module",
 	"scripts": {
-		"dev": "tsx watch src/index.ts",
+		"dev": "tsx watch --env-file=.env src/index.ts",
 		"build": "tsc -p tsconfig.build.json",
-		"start": "node dist/index.js",
+		"start": "node --env-file=.env dist/index.js",
 		"check": "biome check --write",
 		"typecheck": "tsc -p tsconfig.json",
 		"test": "vitest run",
@@ -14,6 +14,7 @@
 		"@hono/node-server": "^2.1.1",
 		"@hono/swagger-ui": "^0.6.1",
 		"@hono/zod-openapi": "^1.6.0",
+		"canonicalize": "^4.0.0",
 		"hono": "^4.13.2",
 		"zod": "^4.4.3"
 	},

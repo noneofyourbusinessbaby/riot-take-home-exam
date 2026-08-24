@@ -82,6 +82,22 @@ describe("POST /verify", () => {
 		expect(await res.json()).toEqual({ error: expect.any(String) });
 	});
 
+	// A signature is compared byte by byte while it travels as text, and the two
+	// lengths only agree while it stays ASCII. A forgery counting the right number
+	// of characters is still a rejection, never a failure.
+	it("rejects a signature of the right length holding a non-ASCII character", async () => {
+		const signed = await client.sign.$post({ json: message });
+		assert(signed.ok);
+		const { signature } = await signed.json();
+
+		const res = await client.verify.$post({
+			json: { signature: `${signature.slice(0, -1)}é`, data: message },
+		});
+
+		expect(res.status).toBe(400);
+		expect(await res.json()).toEqual({ error: expect.any(String) });
+	});
+
 	it("rejects a signature computed for another payload", async () => {
 		const signed = await client.sign.$post({
 			json: { ...message, message: "Goodbye World" },

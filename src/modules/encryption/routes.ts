@@ -1,6 +1,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { HTTPException } from "hono/http-exception";
-import { ErrorSchema, JsonObjectSchema } from "../schemas/common.js";
+import { defaultHook } from "../../errors.js";
+import { ErrorSchema, JsonObjectSchema } from "../../schemas.js";
+import type { EncryptionService } from "./service.js";
 
 /** Every depth-1 property is replaced by its encrypted string representation. */
 const EncryptedPayloadSchema = z
@@ -75,10 +76,17 @@ const decryptRoute = createRoute({
 	},
 });
 
-export const encryptionRoutes = new OpenAPIHono()
-	.openapi(encryptRoute, () => {
-		throw new HTTPException(501, { message: "Not implemented" });
-	})
-	.openapi(decryptRoute, () => {
-		throw new HTTPException(501, { message: "Not implemented" });
-	});
+/**
+ * The HTTP adapter of the encryption side: it turns requests into calls on the
+ * `EncryptionService` port and its answers into responses, and holds nothing
+ * else. The service is a parameter rather than an import so that this file names
+ * no algorithm and no implementation — `src/app.ts` decides which one drives it.
+ */
+export const encryptionRoutes = (service: EncryptionService) =>
+	new OpenAPIHono({ defaultHook })
+		.openapi(encryptRoute, (c) =>
+			c.json(service.encryptPayload(c.req.valid("json")), 200),
+		)
+		.openapi(decryptRoute, (c) =>
+			c.json(service.decryptPayload(c.req.valid("json")), 200),
+		);
