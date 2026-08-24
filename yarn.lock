@@ -5,6 +5,17 @@ __metadata:
   version: 10
   cacheKey: 10c0
 
+"@asteasolutions/zod-to-openapi@npm:^9.1.0":
+  version: 9.1.0
+  resolution: "@asteasolutions/zod-to-openapi@npm:9.1.0"
+  dependencies:
+    openapi3-ts: "npm:^4.6.0"
+  peerDependencies:
+    zod: ^4.0.0
+  checksum: 10c0/a6bfbdeab046036ed5e8ba1d460e7c2fb4b780f0c3f6d36afe76cea29cd1b8fc33de00661c57b7835c1cb5235c192ab87ff339b0785f328dacfee6eb1396277f
+  languageName: node
+  linkType: hard
+
 "@biomejs/biome@npm:2.5.8":
   version: 2.5.8
   resolution: "@biomejs/biome@npm:2.5.8"
@@ -284,6 +295,39 @@ __metadata:
   peerDependencies:
     hono: ^4
   checksum: 10c0/7ef810ca647c56d8d9386fd81609e18443b3a5634aa5ecabdf357e7ca724613c535e863c15ded9b7ae89b935a073040fb11e6d59041f3b1c3e153d8ecb699880
+  languageName: node
+  linkType: hard
+
+"@hono/swagger-ui@npm:^0.6.1":
+  version: 0.6.1
+  resolution: "@hono/swagger-ui@npm:0.6.1"
+  peerDependencies:
+    hono: ">=4.0.0"
+  checksum: 10c0/9f4fc6aff3762ace6b6755ed071e84cfc6b0f6c944831b1176ff7a4f0b36c9871db65ff34cadbcc2a46dd4a80bd68f9b5b6585348f9ac77df3c771ed7c708df1
+  languageName: node
+  linkType: hard
+
+"@hono/zod-openapi@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "@hono/zod-openapi@npm:1.6.0"
+  dependencies:
+    "@asteasolutions/zod-to-openapi": "npm:^9.1.0"
+    "@hono/zod-validator": "npm:^0.9.0"
+    openapi3-ts: "npm:^4.5.0"
+  peerDependencies:
+    hono: ">=4.10.0"
+    zod: ^4.0.0
+  checksum: 10c0/f5583a2179f44a5c105fc969bcd4c303e2051b204e47d2bc12fd8108bd2f5ec8b46a818f3e664e466163e5540c0b4f81cb77586b1e2be94b58e8a3ddaae79a2a
+  languageName: node
+  linkType: hard
+
+"@hono/zod-validator@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "@hono/zod-validator@npm:0.9.0"
+  peerDependencies:
+    hono: ">=4.11.2"
+    zod: ^3.25.0 || ^4.0.0
+  checksum: 10c0/74502187fb18113c2f4254050501e6da84f86b44b7a598675379ec2e8f4a3db571bc1a17d48da3a75c01dcbf251c1a7c8cc12cef4e53523aade0f793b64586e3
   languageName: node
   linkType: hard
 
@@ -670,6 +714,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"openapi3-ts@npm:^4.5.0, openapi3-ts@npm:^4.6.0":
+  version: 4.6.1
+  resolution: "openapi3-ts@npm:4.6.1"
+  dependencies:
+    yaml: "npm:^2.9.0"
+  checksum: 10c0/6593453cb4cc39de4216118946a473244cfc2a1cbc766df27e15be1922e202016fed6e2fc568e67a82535f596f62cbbe5c66e8aafd6c4891849d677140096932
+  languageName: node
+  linkType: hard
+
 "picomatch@npm:^4.0.4":
   version: 4.0.5
   resolution: "picomatch@npm:4.0.5"
@@ -699,11 +752,14 @@ __metadata:
   dependencies:
     "@biomejs/biome": "npm:2.5.8"
     "@hono/node-server": "npm:^2.1.1"
+    "@hono/swagger-ui": "npm:^0.6.1"
+    "@hono/zod-openapi": "npm:^1.6.0"
     "@types/node": "npm:^26.1.1"
     hono: "npm:^4.13.2"
     husky: "npm:^9.1.7"
     tsx: "npm:^4.23.0"
     typescript: "npm:^7.0.2"
+    zod: "npm:^4.4.3"
   languageName: unknown
   linkType: soft
 
@@ -916,5 +972,21 @@ __metadata:
   version: 5.0.0
   resolution: "yallist@npm:5.0.0"
   checksum: 10c0/a499c81ce6d4a1d260d4ea0f6d49ab4da09681e32c3f0472dee16667ed69d01dae63a3b81745a24bd78476ec4fcf856114cb4896ace738e01da34b2c42235416
+  languageName: node
+  linkType: hard
+
+"yaml@npm:^2.9.0":
+  version: 2.9.0
+  resolution: "yaml@npm:2.9.0"
+  bin:
+    yaml: bin.mjs
+  checksum: 10c0/f340718df45e97a9551b9bf9dac61c80050bc464513b710debfb5067c380c8472e3b67809cffacb4ab5ffb5e66ef9310816c88b05f371cec60abfedd8c88e0a2
+  languageName: node
+  linkType: hard
+
+"zod@npm:^4.4.3":
+  version: 4.4.3
+  resolution: "zod@npm:4.4.3"
+  checksum: 10c0/7ea31b558e88f9faf44f31dd185e2e1cbf51fed3081787fb96cc2534749b50c0acfc6da7f0922a7353ed092dd358c7d50c28ea96c94d04af64191bd33152eca3
   languageName: node
   linkType: hard
