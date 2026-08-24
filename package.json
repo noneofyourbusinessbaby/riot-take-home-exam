@@ -16,17 +16,17 @@
 	"dependencies": {
 		"@hono/node-server": "^2.1.1",
 		"@hono/swagger-ui": "^0.6.1",
-		"@hono/zod-openapi": "^1.6.0",
+		"@hono/zod-openapi": "^1.6.1",
 		"canonicalize": "^4.0.0",
-		"hono": "^4.13.2",
+		"hono": "^4.13.3",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.8",
+		"@biomejs/biome": "2.5.9",
 		"@types/node": "^26.1.1",
 		"husky": "^9.1.7",
 		"tsx": "^4.23.0",
 		"typescript": "^7.0.2",
-		"vitest": "^4.1.10"
+		"vitest": "^4.1.11"
 	}
 }
