@@ -2,10 +2,8 @@ import { testClient } from "hono/testing";
 import { assert, describe, expect, it } from "vitest";
 import { app } from "../../src/app.js";
 
-/** @see https://hono.dev/docs/helpers/testing */
 const client = testClient(app);
 
-/** The encryption the API applies to one value: base64 of its JSON form. */
 const base64 = (value: unknown) => btoa(JSON.stringify(value));
 
 const contact = { email: "john@example.com", phone: "123-456-7890" };

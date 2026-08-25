@@ -2,7 +2,6 @@ import { testClient } from "hono/testing";
 import { describe, expect, it } from "vitest";
 import { app } from "../../src/app.js";
 
-/** @see https://hono.dev/docs/helpers/testing */
 const client = testClient(app);
 
 const message = { message: "Hello World", timestamp: 1616161616 };

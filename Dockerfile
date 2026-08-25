@@ -37,8 +37,6 @@ COPY --from=build /app/dist ./dist
 # this file the first import fails at startup.
 COPY package.json ./
 
-# Already the default of the `nonroot` tag, and stated anyway: it is the property
-# the image is chosen for.
 USER nonroot:nonroot
 EXPOSE 3000
 

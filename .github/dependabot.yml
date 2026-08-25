@@ -1,9 +1,6 @@
 version: 2
 
-# Three ecosystems, because three files pin versions that go stale: the manifest,
-# the workflows and the Dockerfile's base image. Updates are grouped per ecosystem
-# so the week brings one pull request to review per ecosystem rather than one per
-# package, and CI answers each of them the same way it answers any other change.
+# Group each ecosystem so weekly updates arrive as one pull request.
 updates:
   - package-ecosystem: npm
     directory: /
@@ -21,9 +18,7 @@ updates:
       actions:
         patterns: ["*"]
 
-  # Reads the one `FROM node:…` line the Dockerfile declares. The Node version
-  # also lives in `.nvmrc`, which nothing updates automatically, so a bump here is
-  # the reminder to move that file with it.
+  # A Docker update is also the reminder to keep `.nvmrc` aligned.
   - package-ecosystem: docker
     directory: /
     schedule:

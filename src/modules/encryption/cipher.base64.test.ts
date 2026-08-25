@@ -4,7 +4,6 @@ import { Base64Cipher } from "./cipher.base64.js";
 const cipher = new Base64Cipher();
 
 describe("Base64Cipher", () => {
-	// `Buffer` and not `btoa`, which only accepts Latin-1 and would throw here.
 	it("round trips a non-ASCII character", () => {
 		expect(cipher.decrypt(cipher.encrypt("John Do☹e"))).toBe("John Do☹e");
 	});

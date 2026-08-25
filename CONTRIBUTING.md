@@ -8,7 +8,7 @@ Husky hooks, through `postinstall`.
 - The pre-commit hook runs `yarn check` (Biome). The formatter is authoritative:
   tabs, double quotes, never hand-format against it.
 - Run `yarn typecheck` and `yarn test` before opening a pull request. CI runs the
-  same checks and will not tell you anything new.
+  same checks.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org).
 
 ## Tests

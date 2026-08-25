@@ -25,8 +25,6 @@ const person = { name: "John Doe", age: 30, contact };
 
 describe("EncryptionService", () => {
 	describe("encryptPayload", () => {
-		// A number is encrypted as a number and not as `"30"`, which is what lets
-		// /decrypt give the type back.
 		it("encrypts every depth-1 property without changing the type of its value", () => {
 			expect(service.encryptPayload(person)).toEqual({
 				name: '<"John Doe">',
@@ -35,7 +33,6 @@ describe("EncryptionService", () => {
 			});
 		});
 
-		// An array is encrypted as one value, and its order is part of that value.
 		it("encrypts an array as a whole rather than element by element", () => {
 			expect(service.encryptPayload({ tags: ["beta", "admin"] })).toEqual({
 				tags: '<["beta","admin"]>',

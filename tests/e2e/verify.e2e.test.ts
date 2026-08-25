@@ -2,7 +2,6 @@ import { testClient } from "hono/testing";
 import { assert, describe, expect, it } from "vitest";
 import { app } from "../../src/app.js";
 
-/** @see https://hono.dev/docs/helpers/testing */
 const client = testClient(app);
 
 const message = { message: "Hello World", timestamp: 1616161616 };
@@ -22,8 +21,6 @@ describe("POST /verify", () => {
 		expect(await res.text()).toBe("");
 	});
 
-	// The requirement the exercise states: the signature answers for the value of
-	// the payload, not for the way it was written.
 	it("accepts the same data with its properties in another order", async () => {
 		const signed = await client.sign.$post({ json: message });
 		assert(signed.ok);

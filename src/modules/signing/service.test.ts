@@ -40,7 +40,6 @@ describe("SigningService", () => {
 			);
 		});
 
-		// An array is a value and not a record: its order is part of what is signed.
 		it("keeps the order of an array", () => {
 			const signer = new RecordingSigner();
 
