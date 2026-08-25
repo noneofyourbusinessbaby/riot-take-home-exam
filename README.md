@@ -3,6 +3,10 @@
 An HTTP API exposing four endpoints: `/encrypt`, `/decrypt`, `/sign` and
 `/verify`. Their contract is the OpenAPI document the API serves.
 
+Deployed demo: [Railway](https://riot-take-home-exam-production.up.railway.app/)
+([Swagger UI](https://riot-take-home-exam-production.up.railway.app/ui),
+[OpenAPI document](https://riot-take-home-exam-production.up.railway.app/doc)).
+
 ## Setup
 
 Node 26 (see `.nvmrc`) and Yarn 4, which comes from Corepack.
