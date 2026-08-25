@@ -1,6 +1,9 @@
 import { serve } from "@hono/node-server";
+import { showRoutes } from "hono/dev";
 import { app } from "./app.js";
 import { config } from "./config.js";
+
+showRoutes(app);
 
 const server = serve(
 	{

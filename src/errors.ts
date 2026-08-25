@@ -1,5 +1,5 @@
 import { type Hook, z } from "@hono/zod-openapi";
-import type { Env, ErrorHandler } from "hono";
+import type { Env, ErrorHandler, NotFoundHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 
 /**
@@ -21,10 +21,23 @@ export const defaultHook: Hook<unknown, Env, string, unknown> = (result, c) => {
  * @see https://hono.dev/docs/api/exception
  */
 export const errorHandler: ErrorHandler = (error, c) => {
+	if (!(error instanceof HTTPException) || error.status >= 500) {
+		console.error(
+			{
+				requestId: c.get("requestId"),
+				method: c.req.method,
+				path: c.req.path,
+			},
+			error,
+		);
+	}
+
 	if (error instanceof HTTPException) {
 		return c.json({ error: error.message }, error.status);
 	}
 
-	console.error(error);
 	return c.json({ error: "Internal server error" }, 500);
 };
+
+export const notFoundHandler: NotFoundHandler = (c) =>
+	c.json({ error: "Not found" }, 404);
