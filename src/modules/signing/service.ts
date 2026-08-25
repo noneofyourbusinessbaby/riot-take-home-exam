@@ -17,7 +17,7 @@ const canonical = (payload: Record<string, unknown>): string => {
 	// a function, a symbol). A payload parsed from a JSON body is never one of
 	// those, so this states the invariant rather than handling a case.
 	if (serialized === undefined) {
-		throw Error("The payload has no canonicalize JSON representation");
+		throw Error("The payload has no canonical JSON representation");
 	}
 
 	return serialized;
