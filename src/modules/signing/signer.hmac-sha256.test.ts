@@ -7,44 +7,39 @@ const message = '{"message":"Hello World","timestamp":1616161616}';
 
 describe("HmacSha256Signer", () => {
 	it("signs a message differently under another secret", () => {
-		expect(new HmacSha256Signer("another-secret").sign(message)).not.toBe(
-			signer.sign(message),
-		);
+		const anotherSigner = new HmacSha256Signer("another-secret");
+
+		const signature = signer.sign(message);
+		const otherSignature = anotherSigner.sign(message);
+
+		expect(otherSignature).not.toBe(signature);
 	});
 
 	it("accepts the signature it produced", () => {
-		expect(signer.verify(message, signer.sign(message))).toBe(true);
-	});
-
-	it("rejects the signature of another message", () => {
-		expect(signer.verify(message, signer.sign("Goodbye World"))).toBe(false);
-	});
-
-	it("rejects a tampered signature", () => {
 		const signature = signer.sign(message);
 
-		expect(
-			signer.verify(
-				message,
-				`${signature.slice(0, -1)}${signature.endsWith("a") ? "b" : "a"}`,
-			),
-		).toBe(false);
+		const result = signer.verify(message, signature);
+
+		expect(result).toBe(true);
 	});
 
-	it("rejects a truncated signature", () => {
-		expect(signer.verify(message, signer.sign(message).slice(0, -1))).toBe(
-			false,
-		);
-	});
+	it.each([
+		["another message", () => signer.sign("Goodbye World")],
+		[
+			"a changed hexadecimal character",
+			() => {
+				const signature = signer.sign(message);
+				return `${signature.slice(0, -1)}${signature.endsWith("a") ? "b" : "a"}`;
+			},
+		],
+		["a truncated value", () => signer.sign(message).slice(0, -1)],
+		[
+			"a non-ASCII final character",
+			() => `${signer.sign(message).slice(0, -1)}é`,
+		],
+	] as const)("rejects %s", (_case, signature) => {
+		const result = signer.verify(message, signature());
 
-	// A signature is compared byte by byte while it travels as text, and one
-	// non-ASCII character makes it longer than the hex it imitates.
-	// `timingSafeEqual` throws on buffers of different lengths, so the comparison
-	// is guarded by one: a forgery of the right character count is a rejection,
-	// never a failure.
-	it("rejects a signature of the right length holding a non-ASCII character", () => {
-		expect(
-			signer.verify(message, `${signer.sign(message).slice(0, -1)}é`),
-		).toBe(false);
+		expect(result).toBe(false);
 	});
 });

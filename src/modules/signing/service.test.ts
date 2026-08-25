@@ -24,54 +24,45 @@ const message = { message: "Hello World", timestamp: 1616161616 };
 
 describe("SigningService", () => {
 	describe("signPayload", () => {
-		it("signs the value of the payload, not the order it was written in", () => {
-			const signer = new RecordingSigner();
-
-			const signature = new SigningService(signer).signPayload({
-				timestamp: 1616161616,
-				message: "Hello World",
-			});
-
-			expect(signer.messages).toEqual([
+		it.each([
+			[
+				"sorts object properties",
+				{ timestamp: 1616161616, message: "Hello World" },
 				'{"message":"Hello World","timestamp":1616161616}',
-			]);
-			expect(signature).toBe(
-				'signature of {"message":"Hello World","timestamp":1616161616}',
-			);
-		});
-
-		it("keeps the order of an array", () => {
+			],
+			[
+				"preserves array order",
+				{ tags: ["beta", "admin"] },
+				'{"tags":["beta","admin"]}',
+			],
+		] as const)("%s before signing", (_case, payload, canonical) => {
 			const signer = new RecordingSigner();
 
-			new SigningService(signer).signPayload({ tags: ["beta", "admin"] });
+			const signature = new SigningService(signer).signPayload(payload);
 
-			expect(signer.messages).toEqual(['{"tags":["beta","admin"]}']);
+			expect(signer.messages).toEqual([canonical]);
+			expect(signature).toBe(`signature of ${canonical}`);
 		});
 	});
 
 	describe("verifyPayload", () => {
-		it("accepts the same data with its properties in another order", () => {
-			const service = new SigningService(new RecordingSigner());
-			const signature = service.signPayload(message);
+		it.each([
+			[
+				"the same data with reordered properties",
+				{ timestamp: 1616161616, message: "Hello World" },
+				true,
+			],
+			["tampered data", { ...message, message: "Goodbye World" }, false],
+		] as const)(
+			"returns the expected result for %s",
+			(_case, payload, expected) => {
+				const service = new SigningService(new RecordingSigner());
+				const signature = service.signPayload(message);
 
-			expect(
-				service.verifyPayload(
-					{ timestamp: 1616161616, message: "Hello World" },
-					signature,
-				),
-			).toBe(true);
-		});
+				const result = service.verifyPayload(payload, signature);
 
-		it("rejects tampered data", () => {
-			const service = new SigningService(new RecordingSigner());
-			const signature = service.signPayload(message);
-
-			expect(
-				service.verifyPayload(
-					{ ...message, message: "Goodbye World" },
-					signature,
-				),
-			).toBe(false);
-		});
+				expect(result).toBe(expected);
+			},
+		);
 	});
 });

@@ -7,33 +7,23 @@ const client = testClient(app);
 const message = { message: "Hello World", timestamp: 1616161616 };
 
 describe("POST /verify", () => {
-	it("accepts a signature produced by /sign", async () => {
-		const signed = await client.sign.$post({ json: message });
-		// Narrows the 200 | 400 union the route declares, so `signature` is typed.
-		assert(signed.ok);
-		const { signature } = await signed.json();
-
-		const res = await client.verify.$post({
-			json: { signature, data: message },
-		});
-
-		expect(res.status).toBe(204);
-		expect(await res.text()).toBe("");
-	});
-
-	it("accepts the same data with its properties in another order", async () => {
+	it.each([
+		["the original data", message],
+		[
+			"the same data with reordered properties",
+			{ timestamp: 1616161616, message: "Hello World" },
+		],
+	] as const)("accepts %s", async (_case, data) => {
 		const signed = await client.sign.$post({ json: message });
 		assert(signed.ok);
 		const { signature } = await signed.json();
 
-		const res = await client.verify.$post({
-			json: {
-				signature,
-				data: { timestamp: 1616161616, message: "Hello World" },
-			},
+		const response = await client.verify.$post({
+			json: { signature, data },
 		});
 
-		expect(res.status).toBe(204);
+		expect(response.status).toBe(204);
+		expect(await response.text()).toBe("");
 	});
 
 	it("rejects tampered data", async () => {
@@ -41,47 +31,27 @@ describe("POST /verify", () => {
 		assert(signed.ok);
 		const { signature } = await signed.json();
 
-		const res = await client.verify.$post({
+		const response = await client.verify.$post({
 			json: { signature, data: { ...message, message: "Goodbye World" } },
 		});
+		const body = await response.json();
 
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: expect.any(String) });
+		expect(response.status).toBe(400);
+		expect(body).toEqual({ error: expect.any(String) });
 	});
 
-	// The typed client requires both properties, so the incomplete bodies the API
-	// has to reject are sent with app.request.
-	// @see https://hono.dev/docs/guides/testing
-	it("rejects a body without a signature", async () => {
-		const res = await app.request("/verify", {
+	it.each([
+		["a missing signature", JSON.stringify({ data: message })],
+		["missing data", JSON.stringify({ signature: "a1b2c3d4e5f6g7h8i9j0" })],
+		["malformed JSON", "{ not json"],
+	])("rejects %s", async (_case, body) => {
+		const response = await app.request("/verify", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ data: message }),
+			body,
 		});
 
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: expect.any(String) });
-	});
-
-	it("rejects a body without data", async () => {
-		const res = await app.request("/verify", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ signature: "a1b2c3d4e5f6g7h8i9j0" }),
-		});
-
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: expect.any(String) });
-	});
-
-	it("rejects a malformed JSON body", async () => {
-		const res = await app.request("/verify", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: "{ not json",
-		});
-
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: expect.any(String) });
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({ error: expect.any(String) });
 	});
 });

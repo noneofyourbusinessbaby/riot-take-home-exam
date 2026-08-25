@@ -8,33 +8,24 @@ const message = { message: "Hello World", timestamp: 1616161616 };
 
 describe("POST /sign", () => {
 	it("returns the signature of the payload", async () => {
-		const res = await client.sign.$post({ json: message });
+		const response = await client.sign.$post({ json: message });
+		const body = await response.json();
 
-		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ signature: expect.any(String) });
+		expect(response.status).toBe(200);
+		expect(body).toEqual({ signature: expect.any(String) });
 	});
 
-	// The typed client only accepts JSON objects, so the bodies the API has to
-	// reject are sent with app.request. @see https://hono.dev/docs/guides/testing
-	it("rejects a body that is not a JSON object", async () => {
-		const res = await app.request("/sign", {
+	it.each([
+		["a top-level string", JSON.stringify("Hello World")],
+		["malformed JSON", "{ not json"],
+	])("rejects %s", async (_case, body) => {
+		const response = await app.request("/sign", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify("Hello World"),
+			body,
 		});
 
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: expect.any(String) });
-	});
-
-	it("rejects a malformed JSON body", async () => {
-		const res = await app.request("/sign", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: "{ not json",
-		});
-
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: expect.any(String) });
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({ error: expect.any(String) });
 	});
 });

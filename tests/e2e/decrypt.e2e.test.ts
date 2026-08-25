@@ -11,7 +11,7 @@ const person = { name: "John Doe", age: 30, contact };
 
 describe("POST /decrypt", () => {
 	it("decrypts every encrypted property and leaves the others unchanged", async () => {
-		const res = await client.decrypt.$post({
+		const response = await client.decrypt.$post({
 			json: {
 				name: base64("John Doe"),
 				age: base64(30),
@@ -19,9 +19,10 @@ describe("POST /decrypt", () => {
 				birth_date: "1998-11-19",
 			},
 		});
+		const body = await response.json();
 
-		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({ ...person, birth_date: "1998-11-19" });
+		expect(response.status).toBe(200);
+		expect(body).toEqual({ ...person, birth_date: "1998-11-19" });
 	});
 
 	it("returns the original payload when decrypting the output of /encrypt", async () => {
@@ -35,32 +36,23 @@ describe("POST /decrypt", () => {
 		const decrypted = await client.decrypt.$post({
 			json: await encrypted.json(),
 		});
+		const body = await decrypted.json();
 
 		expect(decrypted.status).toBe(200);
-		expect(await decrypted.json()).toEqual(payload);
+		expect(body).toEqual(payload);
 	});
 
-	// The typed client only accepts JSON objects, so the bodies the API has to
-	// reject are sent with app.request. @see https://hono.dev/docs/guides/testing
-	it("rejects a body that is not a JSON object", async () => {
-		const res = await app.request("/decrypt", {
+	it.each([
+		["a top-level string", JSON.stringify(base64("John Doe"))],
+		["malformed JSON", "{ not json"],
+	])("rejects %s", async (_case, body) => {
+		const response = await app.request("/decrypt", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(base64("John Doe")),
+			body,
 		});
 
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: expect.any(String) });
-	});
-
-	it("rejects a malformed JSON body", async () => {
-		const res = await app.request("/decrypt", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: "{ not json",
-		});
-
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: expect.any(String) });
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({ error: expect.any(String) });
 	});
 });

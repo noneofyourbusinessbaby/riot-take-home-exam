@@ -11,37 +11,28 @@ const person = { name: "John Doe", age: 30, contact };
 
 describe("POST /encrypt", () => {
 	it("encrypts every depth-1 property of the payload", async () => {
-		const res = await client.encrypt.$post({ json: person });
+		const response = await client.encrypt.$post({ json: person });
+		const body = await response.json();
 
-		expect(res.status).toBe(200);
-		expect(await res.json()).toEqual({
+		expect(response.status).toBe(200);
+		expect(body).toEqual({
 			name: base64("John Doe"),
 			age: base64(30),
 			contact: base64(contact),
 		});
 	});
 
-	// The typed client only accepts JSON objects, so the bodies the API has to
-	// reject are sent with app.request. @see https://hono.dev/docs/guides/testing
-	it("rejects a body that is not a JSON object", async () => {
-		const res = await app.request("/encrypt", {
+	it.each([
+		["a top-level array", JSON.stringify(["John Doe"])],
+		["malformed JSON", "{ not json"],
+	])("rejects %s", async (_case, body) => {
+		const response = await app.request("/encrypt", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(["John Doe"]),
+			body,
 		});
 
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: expect.any(String) });
-	});
-
-	it("rejects a malformed JSON body", async () => {
-		const res = await app.request("/encrypt", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: "{ not json",
-		});
-
-		expect(res.status).toBe(400);
-		expect(await res.json()).toEqual({ error: expect.any(String) });
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({ error: expect.any(String) });
 	});
 });

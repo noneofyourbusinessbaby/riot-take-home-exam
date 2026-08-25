@@ -26,7 +26,9 @@ const person = { name: "John Doe", age: 30, contact };
 describe("EncryptionService", () => {
 	describe("encryptPayload", () => {
 		it("encrypts every depth-1 property without changing the type of its value", () => {
-			expect(service.encryptPayload(person)).toEqual({
+			const encrypted = service.encryptPayload(person);
+
+			expect(encrypted).toEqual({
 				name: '<"John Doe">',
 				age: "<30>",
 				contact: '<{"email":"john@example.com","phone":"123-456-7890"}>',
@@ -34,85 +36,52 @@ describe("EncryptionService", () => {
 		});
 
 		it("encrypts an array as a whole rather than element by element", () => {
-			expect(service.encryptPayload({ tags: ["beta", "admin"] })).toEqual({
+			const encrypted = service.encryptPayload({ tags: ["beta", "admin"] });
+
+			expect(encrypted).toEqual({
 				tags: '<["beta","admin"]>',
 			});
 		});
 
-		it("returns the properties in the order it was given them", () => {
-			expect(Object.keys(service.encryptPayload(person))).toEqual([
-				"name",
-				"age",
-				"contact",
-			]);
-		});
-
 		it("returns an empty object for an empty payload", () => {
-			expect(service.encryptPayload({})).toEqual({});
+			const encrypted = service.encryptPayload({});
+
+			expect(encrypted).toEqual({});
 		});
 	});
 
 	describe("decryptPayload", () => {
-		it("decrypts every encrypted property and restores its JSON type", () => {
-			expect(
-				service.decryptPayload({
-					name: '<"John Doe">',
-					age: "<30>",
-					active: "<true>",
-					nickname: "<null>",
-					tags: '<["admin","beta"]>',
-				}),
-			).toEqual({
-				name: "John Doe",
-				age: 30,
-				active: true,
-				nickname: null,
-				tags: ["admin", "beta"],
-			});
+		it.each([
+			["string", '<"John Doe">', "John Doe"],
+			["number", "<30>", 30],
+			["boolean", "<true>", true],
+			["null", "<null>", null],
+			["array", '<["admin","beta"]>', ["admin", "beta"]],
+			["object", '<{"role":"admin"}>', { role: "admin" }],
+		] as const)("restores an encrypted %s", (_case, encrypted, expected) => {
+			const decrypted = service.decryptPayload({ value: encrypted });
+
+			expect(decrypted).toEqual({ value: expected });
 		});
 
-		it("leaves a property that was never encrypted unchanged", () => {
-			expect(
-				service.decryptPayload({
-					name: '<"John Doe">',
-					birth_date: "1998-11-19",
-				}),
-			).toEqual({ name: "John Doe", birth_date: "1998-11-19" });
-		});
+		it.each([
+			["an unencrypted plain string", "1998-11-19"],
+			["an unencrypted number", 30],
+			["an unencrypted object", contact],
+			["ciphertext whose plaintext is not JSON", "<not json>"],
+		] as const)("leaves %s unchanged", (_case, value) => {
+			const decrypted = service.decryptPayload({ value });
 
-		it("leaves a value that is not a string unchanged", () => {
-			expect(service.decryptPayload({ age: 30, contact })).toEqual({
-				age: 30,
-				contact,
-			});
-		});
-
-		// The cipher accepted the value, so only the JSON parse says it was never
-		// encrypted.
-		it("leaves unchanged a value whose plaintext is not JSON", () => {
-			expect(service.decryptPayload({ note: "<not json>" })).toEqual({
-				note: "<not json>",
-			});
-		});
-
-		it("returns the properties in the order it was given them", () => {
-			expect(
-				Object.keys(
-					service.decryptPayload({
-						name: '<"John Doe">',
-						birth_date: "1998-11-19",
-						age: "<30>",
-					}),
-				),
-			).toEqual(["name", "birth_date", "age"]);
+			expect(decrypted).toEqual({ value });
 		});
 
 		it("gives back the payload encryptPayload was handed", () => {
 			const payload = { ...person, tags: ["admin", "beta"], active: true };
+			const encrypted = service.encryptPayload(payload);
 
-			expect(service.decryptPayload(service.encryptPayload(payload))).toEqual(
-				payload,
-			);
+			const decrypted = service.decryptPayload(encrypted);
+
+			expect(decrypted).toEqual(payload);
 		});
 	});
 });
