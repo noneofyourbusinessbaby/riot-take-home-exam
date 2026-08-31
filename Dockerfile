@@ -1,5 +1,5 @@
 # The version `.nvmrc` pins, named once so there is a single line to bump.
-FROM node:26.7.0-alpine AS node
+FROM node:26.8.1-alpine AS node
 
 FROM node AS base
 RUN npm install --global corepack@latest && corepack enable
